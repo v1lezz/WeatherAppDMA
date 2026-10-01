@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DailyForecastList: View {
     let items: [DailyForecast]
+    let temperatureUnit: TemperatureUnit
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -19,10 +20,10 @@ struct DailyForecastList: View {
                             .symbolRenderingMode(.multicolor)
                             .font(.title3)
                         Spacer()
-                        Text("\(Int(item.minC.rounded()))° / \(Int(item.maxC.rounded()))°")
+                        Text("\(UnitFormatter.temperature(celsius: item.minC, unit: temperatureUnit)) / \(UnitFormatter.temperature(celsius: item.maxC, unit: temperatureUnit))")
                             .font(.callout)
                             .foregroundStyle(.secondary)
-                            .frame(width: 90, alignment: .trailing)
+                            .frame(width: 110, alignment: .trailing)
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 12)

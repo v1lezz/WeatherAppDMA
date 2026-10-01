@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WeatherView: View {
     @StateObject private var vm: WeatherViewModel
+    @EnvironmentObject private var preferences: PreferencesStore
 
     init(vm: WeatherViewModel) {
         _vm = StateObject(wrappedValue: vm)
@@ -32,10 +33,24 @@ struct WeatherView: View {
         case .loaded(let weather):
             ScrollView {
                 VStack(spacing: 20) {
-                    CurrentWeatherHeader(city: weather.city, weather: weather.current)
-                    MetricsRow(current: weather.current)
-                    HourlyForecastStrip(items: weather.hourly)
-                    DailyForecastList(items: weather.daily)
+                    CurrentWeatherHeader(
+                        city: weather.city,
+                        weather: weather.current,
+                        temperatureUnit: preferences.preferences.temperatureUnit
+                    )
+                    MetricsRow(
+                        current: weather.current,
+                        temperatureUnit: preferences.preferences.temperatureUnit,
+                        windUnit: preferences.preferences.windUnit
+                    )
+                    HourlyForecastStrip(
+                        items: weather.hourly,
+                        temperatureUnit: preferences.preferences.temperatureUnit
+                    )
+                    DailyForecastList(
+                        items: weather.daily,
+                        temperatureUnit: preferences.preferences.temperatureUnit
+                    )
                 }
                 .padding(.vertical)
             }

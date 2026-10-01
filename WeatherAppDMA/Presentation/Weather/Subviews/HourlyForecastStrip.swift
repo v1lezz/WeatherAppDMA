@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HourlyForecastStrip: View {
     let items: [HourlyForecast]
+    let temperatureUnit: TemperatureUnit
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -19,7 +20,7 @@ struct HourlyForecastStrip: View {
                             Image(systemName: item.condition.sfSymbol)
                                 .symbolRenderingMode(.multicolor)
                                 .font(.title3)
-                            Text("\(Int(item.temperatureC.rounded()))°")
+                            Text(UnitFormatter.temperature(celsius: item.temperatureC, unit: temperatureUnit))
                                 .font(.callout)
                                 .fontWeight(.medium)
                         }

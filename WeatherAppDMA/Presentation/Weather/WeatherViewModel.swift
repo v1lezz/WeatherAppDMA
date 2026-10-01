@@ -8,11 +8,17 @@ final class WeatherViewModel: ObservableObject {
 
     let initialCity: String?
     private let getWeather: GetWeatherForCityUseCase
+    private let updatePreferences: UpdatePreferencesUseCase?
     private var currentTask: Task<Void, Never>?
 
-    init(getWeather: GetWeatherForCityUseCase, initialCity: String? = nil) {
+    init(
+        getWeather: GetWeatherForCityUseCase,
+        initialCity: String? = nil,
+        updatePreferences: UpdatePreferencesUseCase? = nil
+    ) {
         self.getWeather = getWeather
         self.initialCity = initialCity
+        self.updatePreferences = updatePreferences
         if let city = initialCity {
             self.query = city
         }
@@ -29,7 +35,7 @@ final class WeatherViewModel: ObservableObject {
 
     private func fetch(city: String) async {
         currentTask?.cancel()
-        let task = Task { [getWeather] in
+        let task = Task { [getWeather, updatePreferences] in
             let trimmed = city.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else {
                 await MainActor.run { self.state = .idle }
@@ -39,7 +45,10 @@ final class WeatherViewModel: ObservableObject {
             do {
                 let weather = try await getWeather.execute(city: trimmed)
                 if Task.isCancelled { return }
-                await MainActor.run { self.state = .loaded(weather) }
+                await MainActor.run {
+                    self.state = .loaded(weather)
+                    updatePreferences?.setLastOpenedCity(weather.city)
+                }
             } catch AppError.cityNotFound(let city) {
                 await MainActor.run { self.state = .notFound(city: city) }
             } catch AppError.emptyQuery {

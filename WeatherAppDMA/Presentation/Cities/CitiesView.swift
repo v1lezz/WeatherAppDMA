@@ -3,10 +3,21 @@ import SwiftUI
 struct CitiesView: View {
     @StateObject private var vm: CitiesViewModel
     private let makeWeatherView: (String) -> WeatherView
+    private let makeFavoritesView: () -> FavoritesView
+    private let makeSettingsView: () -> SettingsView
 
-    init(vm: CitiesViewModel, makeWeatherView: @escaping (String) -> WeatherView) {
+    @State private var isSettingsPresented = false
+
+    init(
+        vm: CitiesViewModel,
+        makeWeatherView: @escaping (String) -> WeatherView,
+        makeFavoritesView: @escaping () -> FavoritesView,
+        makeSettingsView: @escaping () -> SettingsView
+    ) {
         _vm = StateObject(wrappedValue: vm)
         self.makeWeatherView = makeWeatherView
+        self.makeFavoritesView = makeFavoritesView
+        self.makeSettingsView = makeSettingsView
     }
 
     var body: some View {
@@ -18,6 +29,25 @@ struct CitiesView: View {
                     placement: .navigationBarDrawer(displayMode: .always),
                     prompt: "Поиск города"
                 )
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        NavigationLink {
+                            makeFavoritesView()
+                        } label: {
+                            Image(systemName: "star")
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            isSettingsPresented = true
+                        } label: {
+                            Image(systemName: "gearshape")
+                        }
+                    }
+                }
+                .sheet(isPresented: $isSettingsPresented) {
+                    makeSettingsView()
+                }
                 .task { await vm.load() }
         }
     }
@@ -43,10 +73,17 @@ struct CitiesView: View {
                     NavigationLink {
                         makeWeatherView(city.name)
                     } label: {
-                        CityRow(city: city)
+                        CityRow(
+                            city: city,
+                            isFavorite: vm.isFavorite(city),
+                            onToggleFavorite: {
+                                Task { await vm.toggleFavorite(city) }
+                            }
+                        )
                     }
                 }
                 .listStyle(.plain)
+                .refreshable { await vm.load() }
             }
 
         case .error(let message):
@@ -61,6 +98,8 @@ struct CitiesView: View {
 
 private struct CityRow: View {
     let city: CitySummary
+    let isFavorite: Bool
+    let onToggleFavorite: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -80,6 +119,11 @@ private struct CityRow: View {
                 .font(.title3)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)
+            Button(action: onToggleFavorite) {
+                Image(systemName: isFavorite ? "star.fill" : "star")
+                    .foregroundStyle(isFavorite ? .yellow : .secondary)
+            }
+            .buttonStyle(.borderless)
         }
         .padding(.vertical, 4)
     }
