@@ -2,12 +2,26 @@ import SwiftUI
 
 struct MetricsRow: View {
     let current: CurrentWeather
+    let temperatureUnit: TemperatureUnit
+    let windUnit: WindUnit
 
     var body: some View {
         HStack(spacing: 12) {
-            metric(icon: "thermometer.medium", title: "Ощущается", value: "\(Int(current.feelsLikeC.rounded()))°")
-            metric(icon: "humidity.fill",      title: "Влажность", value: "\(current.humidityPercent)%")
-            metric(icon: "wind",               title: "Ветер",     value: String(format: "%.1f м/с", current.windMS))
+            metric(
+                icon: "thermometer.medium",
+                title: "Ощущается",
+                value: UnitFormatter.temperature(celsius: current.feelsLikeC, unit: temperatureUnit)
+            )
+            metric(
+                icon: "humidity.fill",
+                title: "Влажность",
+                value: "\(current.humidityPercent)%"
+            )
+            metric(
+                icon: "wind",
+                title: "Ветер",
+                value: UnitFormatter.wind(ms: current.windMS, unit: windUnit)
+            )
         }
         .padding(.horizontal)
     }

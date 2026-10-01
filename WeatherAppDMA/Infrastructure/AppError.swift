@@ -6,6 +6,9 @@ enum AppError: LocalizedError, Equatable {
     case resourceNotFound(String)
     case decodingFailed(String)
     case notImplemented
+    case favoriteAlreadyExists(String)
+    case favoriteNotFound
+    case persistenceFailed(String)
     case unknown
 
     var errorDescription: String? {
@@ -20,6 +23,12 @@ enum AppError: LocalizedError, Equatable {
             return "Не удалось декодировать данные о погоде: \(details)"
         case .notImplemented:
             return "Этот источник данных ещё не реализован."
+        case .favoriteAlreadyExists(let city):
+            return "«\(city)» уже в избранном."
+        case .favoriteNotFound:
+            return "Избранный город не найден."
+        case .persistenceFailed(let details):
+            return "Не удалось сохранить данные: \(details)"
         case .unknown:
             return "Что-то пошло не так."
         }

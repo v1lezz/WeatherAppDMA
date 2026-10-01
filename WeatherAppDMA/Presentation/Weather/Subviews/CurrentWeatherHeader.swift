@@ -3,6 +3,7 @@ import SwiftUI
 struct CurrentWeatherHeader: View {
     let city: String
     let weather: CurrentWeather
+    let temperatureUnit: TemperatureUnit
 
     var body: some View {
         VStack(spacing: 8) {
@@ -16,10 +17,11 @@ struct CurrentWeatherHeader: View {
                 .symbolRenderingMode(.multicolor)
                 .padding(.vertical, 8)
 
+            let displayValue = temperatureUnit.convert(fromCelsius: weather.temperatureC)
             HStack(alignment: .top, spacing: 2) {
-                Text(Self.temperatureFormatter.string(from: NSNumber(value: weather.temperatureC)) ?? "—")
+                Text(Self.temperatureFormatter.string(from: NSNumber(value: displayValue)) ?? "—")
                     .font(.system(size: 64, weight: .thin, design: .rounded))
-                Text("°C")
+                Text(temperatureUnit.displayName)
                     .font(.system(size: 32, weight: .light, design: .rounded))
                     .foregroundStyle(.secondary)
                     .padding(.top, 8)
@@ -34,7 +36,6 @@ struct CurrentWeatherHeader: View {
     }
 
     private static let temperatureFormatter: NumberFormatter = {
-        //TODO: вынести в отдельный класс
         let f = NumberFormatter()
         f.locale = Locale(identifier: "ru_RU")
         f.numberStyle = .decimal
